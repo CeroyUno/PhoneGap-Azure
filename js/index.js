@@ -17,11 +17,6 @@
  * under the License.
  */
 
-
-/*NOTIFICACIONES*/
-var pushNotification;
-/****************/
-
 var myScroll;
 function loaded() {
 	myScroll = new iScroll('wrapperListado');
@@ -54,78 +49,13 @@ var app = {
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
         mostrar();
-        
-        /*NOTIFICACIONES*/
-        pushNotification = window.plugins.pushNotification;
-        if ( device.platform == 'android' || device.platform == 'Android' )
-        {
-            pushNotification.register(
-                successHandler,
-                errorHandler, {
-                    "senderID":"replace_with_sender_id",
-                    "ecb":"onNotificationGCM"
-                });
-        }
-        /****************/
     }
 };
-
-/*NOTIFICACIONES*/
-function successHandler (result) {
-    alert('result = ' + result);
-}
-function errorHandler (error) {
-    alert('error = ' + error);
-}
-/****************/
 
 var client = new WindowsAzure.MobileServiceClient(
     "https://phonegapazure.azure-mobile.net/",
     "zPykhYjMQcxXAGVjbVsanhQZIfCNSb95"
 );
-
-function insertar(){
-    var item = { text: $( "#valor" ).val() };
-    client.getTable("Clientes").insert(item).done(function (results) {
-        volver();
-        mostrar();
-    }); 
-}
-
-function mostrar(){
-    $('#placeToInsert').html("");
-    client.getTable("Clientes").read().then(function (todoItems) {
-        var li=''; 
-        for (var i = 0; i < todoItems.length; i++) {
-            li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
-        }
-        $('#placeToInsert').append(li);
-        myScroll.refresh();
-    }).read().done(function (results) {
-            alert(JSON.stringify(results));
-    }, function (err) {
-           alert("Error: " + err);
-    });   
-}
-
-function busqueda(texto){
-    alert(texto);
-    $('#placeToInsert').html("");
-    client.getTable("Clientes").where({
-        text: texto
-    }).read().then(function (todoItems) {
-        var li=''; 
-        for (var i = 0; i < todoItems.length; i++) {
-            li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
-        }
-        $('#placeToInsert').append(li);
-        myScroll.refresh();
-    }).read().done(function (results) {
-         alert(JSON.stringify(results));
-    }, function (err) {
-           alert("Error: " + err);
-    });   
-}
 
 function mostrarFormulario(){
     $( "#tituloFormulario" ).html('Nuevo Cliente');
@@ -139,6 +69,72 @@ function volver(){
     $( "#formulario" ).addClass( "right" );
 }
 
+/*MOSTRAR EL LISTADO DE CLIENTES*/
+function mostrar(){
+    $('#placeToInsert').html("");
+    client.getTable("Clientes").read().then(function (todoItems) {
+        var li=''; 
+        for (var i = 0; i < todoItems.length; i++) {
+            li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
+        }
+    }).done(function (results) {
+        $('#placeToInsert').append(li);
+        myScroll.refresh();
+    }, function (err) {
+           alert("Error: " + err);
+    });   
+}
+/***********/
+
+/*BUSQUEDA DESDE EL LISTADO DE CLIENTES*/
+function busqueda(texto){
+    if(texto==""){
+        mostrar();
+    }else{
+        $('#placeToInsert').html("");
+        client.getTable("Clientes").where({
+            text: texto
+        }).read().then(function (todoItems) {
+            var li=''; 
+            for (var i = 0; i < todoItems.length; i++) {
+                li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
+            }
+        }).done(function (results) {
+            $('#placeToInsert').append(li);
+            myScroll.refresh();
+        }, function (err) {
+               alert("Error: " + err);
+        });
+    }
+}
+/***********/
+
+/*INSERTAR NUEVO CLIENTE*/
+function insertar(){
+    var item = { text: $( "#valor" ).val() };
+    client.getTable("Clientes").insert(item).done(function (results) {
+        volver();
+        mostrar();
+    }); 
+}
+/***********/
+
+/*MOSTRAR LA FICHA DE UN CLIENTE*/
+function ficha(id){
+    $( "#tituloFormulario" ).html('Ficha Cliente');
+    $("#scrollerFormulario").html('<div class="fondoValor"><input id="valor" type="text" placeholder="Nombre"></div><div class="boton" onclick="modificar(\''+id+'\')">Modificar</div><div class="boton" onclick="eliminar(\''+id+'\')">Eliminar</div>');
+    client.getTable("Clientes").where({
+        id: id
+    }).read().then(function (todoItems) {
+        $("#valor").val(todoItems[0].text);
+    }).done(function (result) {
+        $( "#formulario" ).removeClass( "right" );
+        $( "#formulario" ).addClass( "center" );
+    });
+}
+/***********/
+
+/*MODIFICAR UN CLIENTE*/
 function modificar(id){
     var item = { text: $( "#valor" ).val() };
     client.getTable("Clientes").update({
@@ -149,28 +145,14 @@ function modificar(id){
         mostrar();
     });
 }
+/***********/
 
+/*ELIMINAR UN CLIENTE*/
 function eliminar(id){
     client.getTable("Clientes").del({ id: id }).then(function (todoItems) {   
         volver();
         mostrar();  
     });
 }
+/***********/
 
-function ficha(id){
-    
-    $( "#tituloFormulario" ).html('Ficha Cliente');
-    
-    $("#scrollerFormulario").html('<div class="fondoValor"><input id="valor" type="text" placeholder="Nombre"></div><div class="boton" onclick="modificar(\''+id+'\')">Modificar</div><div class="boton" onclick="eliminar(\''+id+'\')">Eliminar</div>');
-    
-    client.getTable("Clientes").where({
-        id: id
-    }).read().then(function (todoItems) {
-        $("#valor").val(todoItems[0].text);
-    }).done(function (result) {
-        $( "#formulario" ).removeClass( "right" );
-        $( "#formulario" ).addClass( "center" );
-    });
- 
-
-}
