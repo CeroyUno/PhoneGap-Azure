@@ -77,6 +77,7 @@ function mostrar(){
         for (var i = 0; i < todoItems.length; i++) {
             li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
         }
+        $('#placeToInsert').append(li);
     }).done(function (results) {
         $('#placeToInsert').append(li);
         myScroll.refresh();
