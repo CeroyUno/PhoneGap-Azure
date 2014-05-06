@@ -78,8 +78,6 @@ function mostrar(){
             li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
         }
         $('#placeToInsert').append(li);
-    }).done(function (results) {
-        $('#placeToInsert').append(li);
         myScroll.refresh();
     }, function (err) {
            alert("Error: " + err);
@@ -100,7 +98,6 @@ function busqueda(texto){
             for (var i = 0; i < todoItems.length; i++) {
                 li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
             }
-        }).done(function (results) {
             $('#placeToInsert').append(li);
             myScroll.refresh();
         }, function (err) {
