@@ -48,7 +48,7 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
-        mostrar();
+        listado();
     }
 };
 
@@ -60,6 +60,10 @@ var client = new WindowsAzure.MobileServiceClient(
 function mostrarFormulario(){
     $( "#tituloFormulario" ).html('Nuevo Cliente');
     $("#scrollerFormulario").html('<div class="fondoValor"><input id="valor" type="text" placeholder="Valor del item"></div><div class="boton" onclick="insertar()">Enviar</div>');
+    mostrar();
+}
+
+function mostrar(){
     $( "#formulario" ).removeClass( "right" );
     $( "#formulario" ).addClass( "center" );
 }
@@ -70,18 +74,17 @@ function volver(){
 }
 
 /*MOSTRAR EL LISTADO DE CLIENTES*/
-function mostrar(){
+function listado(){
     $('#placeToInsert').html("");
     client.getTable("Clientes").read().then(function (todoItems) {
         var li=''; 
         for (var i = 0; i < todoItems.length; i++) {
             li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
         }
+    }.done(function (result) {
         $('#placeToInsert').append(li);
         myScroll.refresh();
-    }, function (err) {
-           alert("Error: " + err);
-    });   
+    });  
 }
 /***********/
 
@@ -98,10 +101,9 @@ function busqueda(texto){
             for (var i = 0; i < todoItems.length; i++) {
                 li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
             }
+        }.done(function (result) {
             $('#placeToInsert').append(li);
             myScroll.refresh();
-        }, function (err) {
-               alert("Error: " + err);
         });
     }
 }
@@ -111,8 +113,8 @@ function busqueda(texto){
 function insertar(){
     var item = { text: $( "#valor" ).val() };
     client.getTable("Clientes").insert(item).done(function (results) {
+        listado();
         volver();
-        mostrar();
     }); 
 }
 /***********/
@@ -126,8 +128,7 @@ function ficha(id){
     }).read().then(function (todoItems) {
         $("#valor").val(todoItems[0].text);
     }).done(function (result) {
-        $( "#formulario" ).removeClass( "right" );
-        $( "#formulario" ).addClass( "center" );
+        mostrar();
     });
 }
 /***********/
@@ -139,8 +140,8 @@ function modificar(id){
         id: id,
         text: $( "#valor" ).val()
     }).done(function (result) {
-        volver();
-        mostrar();
+        listado();
+        volver(); 
     });
 }
 /***********/
@@ -148,8 +149,8 @@ function modificar(id){
 /*ELIMINAR UN CLIENTE*/
 function eliminar(id){
     client.getTable("Clientes").del({ id: id }).then(function (todoItems) {   
+        listado();
         volver();
-        mostrar();  
     });
 }
 /***********/
