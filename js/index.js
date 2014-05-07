@@ -17,7 +17,7 @@
  * under the License.
  */
 
-var myScroll;
+var myScroll, li;
 function loaded() {
 	myScroll = new iScroll('wrapperListado');
 }
@@ -48,6 +48,7 @@ var app = {
     // The scope of 'this' is the event. In order to call the 'receivedEvent'
     // function, we must explicity call 'app.receivedEvent(...);'
     onDeviceReady: function() {
+        new FastClick(document.body);
         listado();
     }
 };
@@ -75,9 +76,9 @@ function volver(){
 
 /*MOSTRAR EL LISTADO DE CLIENTES*/
 function listado(){
+    li="";
     $('#placeToInsert').html("");
     client.getTable("Clientes").read().then(function (todoItems) {
-        var li=''; 
         for (var i = 0; i < todoItems.length; i++) {
             li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
         }
@@ -93,11 +94,11 @@ function busqueda(texto){
     if(texto==""){
         mostrar();
     }else{
+        li="";
         $('#placeToInsert').html("");
         client.getTable("Clientes").where({
             text: texto
         }).read().then(function (todoItems) {
-            var li=''; 
             for (var i = 0; i < todoItems.length; i++) {
                 li += '<li onclick="ficha(\''+todoItems[i].id+'\')"><div>'+todoItems[i].text+'</div></li>';
             }
